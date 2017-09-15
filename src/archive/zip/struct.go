@@ -203,6 +203,23 @@ const (
 
 	msdosDir      = 0x10
 	msdosReadOnly = 0x01
+
+	// File/Directory permission bits
+
+	OS_READ        = 04
+	OS_EX          = 01
+	OS_USER_SHIFT  = 6
+	OS_GROUP_SHIFT = 3
+	OS_OTHER_SHIFT = 0
+
+	OS_USER_R = OS_READ << OS_USER_SHIFT
+	OS_USER_X = OS_EX << OS_USER_SHIFT
+
+	OS_GROUP_R = OS_READ << OS_GROUP_SHIFT
+	OS_GROUP_X = OS_EX << OS_GROUP_SHIFT
+
+	OS_OTHER_R = OS_READ << OS_OTHER_SHIFT
+	OS_OTHER_X = OS_EX << OS_OTHER_SHIFT
 )
 
 // Mode returns the permission and mode bits for the FileHeader.
@@ -213,8 +230,17 @@ func (h *FileHeader) Mode() (mode os.FileMode) {
 	case creatorNTFS, creatorVFAT, creatorFAT:
 		mode = msdosModeToFileMode(h.ExternalAttrs)
 	}
-	if len(h.Name) > 0 && h.Name[len(h.Name)-1] == '/' {
+	if len(h.Name) > 0 && h.Name[len(h.Name)-1] == '/' && (mode&os.ModeDir) == 0 {
 		mode |= os.ModeDir
+		if (mode & OS_USER_R) != 0 {
+			mode |= OS_USER_X
+		}
+		if (mode & OS_GROUP_R) != 0 {
+			mode |= OS_GROUP_X
+		}
+		if (mode & OS_OTHER_R) != 0 {
+			mode |= OS_OTHER_X
+		}
 	}
 	return mode
 }

@@ -59,6 +59,46 @@ type ZipTestFile struct {
 
 var tests = []ZipTest{
 	{
+		Name:    "bad-directory-permissions.jar",
+		Comment: "",
+		File: []ZipTestFile{
+			{
+				Name:    "META-INF/",
+				Content: []byte{},
+				Mtime:   "09-18-17 14:53:22",
+				Mode:    0777 | os.ModeDir,
+			},
+			{
+				Name: "META-INF/MANIFEST.MF",
+				File: "META-INF/MANIFEST.MF",
+				Content: []byte(strings.Replace(`Manifest-Version: 1.0
+Created-By: 1.8.0_66 (Oracle Corporation)
+
+`, "\n", "\r\n", -1)),
+				Mtime: "09-18-17 14:53:22",
+				Mode:  0666,
+			},
+		},
+	},
+	{
+		Name:    "dir-no-group-other-exec.zip",
+		Comment: "",
+		File: []ZipTestFile{
+			{
+				Name:    "test/",
+				Content: []byte{},
+				Mtime:   "09-18-17 16:39:36",
+				Mode:    0744 | os.ModeDir,
+			},
+			{
+				Name:    "test/text.txt",
+				Content: []byte("foo\n"),
+				Mtime:   "09-18-17 16:39:22",
+				Mode:    0644,
+			},
+		},
+	},
+	{
 		Name:    "test.zip",
 		Comment: "This is a zipfile comment.",
 		File: []ZipTestFile{
